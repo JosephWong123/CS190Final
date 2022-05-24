@@ -1,4 +1,7 @@
+import kmeans from "./kmeans.js";
+
 var audioContext;
+
 var partitionImage = function(context, canvas, rows, columns) {
     var width = canvas.width;
     var height = canvas.height;
@@ -9,10 +12,10 @@ var partitionImage = function(context, canvas, rows, columns) {
 
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < columns; j++) {
-            rTotal = 0
-            gTotal = 0
-            bTotal = 0
-            aTotal = 0 // don't really care about alpha
+            let rTotal = 0;
+            let gTotal = 0;
+            let bTotal = 0;
+            let aTotal = 0; // don't really care about alpha
 
             var imageData = context.getImageData(i*boxWidth, j*boxHeight, boxWidth, boxHeight); // get the box of appropriate size
             var pixels = imageData.data;
@@ -25,10 +28,10 @@ var partitionImage = function(context, canvas, rows, columns) {
             }
 
             var numPixels = pixels.length/4;
-            rAvg = rTotal / numPixels;
-            gAvg = gTotal / numPixels;
-            bAvg = bTotal / numPixels;
-            aAvg = aTotal / numPixels;
+            let rAvg = rTotal / numPixels;
+            let gAvg = gTotal / numPixels;
+            let bAvg = bTotal / numPixels;
+            let aAvg = aTotal / numPixels;
 
             partitionedData.push(Math.round(rAvg));
             partitionedData.push(Math.round(bAvg));
@@ -111,7 +114,7 @@ var playNotes = function(data) {
     }
 };
 
-var loadFile = function(event) {
+window.loadFile = function(event) {
     if (typeof audioContext !== 'undefined') {
         audioContext.close();
     }
@@ -120,11 +123,29 @@ var loadFile = function(event) {
     var canvas = document.getElementById('output');
     let context = canvas.getContext('2d');
 
-    image = new Image();
+    let image = new Image();
     image.src = URL.createObjectURL(event.target.files[0]);
     image.onload = function(){
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
         let data = partitionImage(context, canvas, 10, 10);
+        let pixelData = [];
+        for (let i = 0; i < data.length; i += 3) {
+            let pixel = [];
+            for (let j = 0; j < 3; ++j) {
+                pixel.push(isFinite(data[i+j]) ? data[i+j] : 0);
+            }
+            pixelData.push(pixel);
+        }
+        let clusterResults = kmeans(pixelData, 5);
+        console.log(clusterResults);
+        for (let i = 0; i < 5; ++i) {
+            const tag = document.getElementById("c" + (i + 1));
+            const color = clusterResults.centroids[i];
+            if (clusterResults.clusters[i].points.length > 1) {
+                console.log(color);
+                tag.style.color = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")";
+            }
+        }
         data = RGBToHSL(data);
         playNotes(data);
     }
