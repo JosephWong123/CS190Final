@@ -1,4 +1,5 @@
 import kmeans from "./kmeans.js";
+import generateKey from "./key.js";
 
 var audioContext;
 
@@ -146,6 +147,8 @@ window.loadFile = function(event) {
                 tag.style.color = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")";
             }
         }
+        let key = generateKey(clusterResults.centroids);
+        console.log(key);
         data = RGBToHSL(data);
         playNotes(data);
     }
