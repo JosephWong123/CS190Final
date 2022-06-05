@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import kmeans from "./kmeans.js";
 import generateKey from "./key.js";
 
@@ -114,13 +115,13 @@ var playNotes = function(data) {
         startNote(gain, freqs[pitch], lightness, i / 3 / 2);
     }
 };
+=======
+import { playNotes } from "./play-notes.js";
+import { kmeans } from "./kmeans.js";
+import { partitionImage, RGBToHSL } from "./image-processing.js";
+>>>>>>> 56f895cb399323ca755c4230f23541e8e395202a
 
 window.loadFile = function(event) {
-    if (typeof audioContext !== 'undefined') {
-        audioContext.close();
-    }
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    audioContext = new AudioContext();
     var canvas = document.getElementById('output');
     let context = canvas.getContext('2d');
 

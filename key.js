@@ -3,6 +3,7 @@ function euclideanDistance(color1, color2) {
 }
 
 // Given the clusters of colors, determine a key for the melody to generate in.
+// Based off the Sciabrin mapping + weighted average.
 function generateKey(centroids) {
     var r = 0;
     var g = 0;
