@@ -32,3 +32,4 @@ function playNotes(data) {
     }
 };
 
+export { playNotes };
