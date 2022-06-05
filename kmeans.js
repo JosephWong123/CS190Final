@@ -208,4 +208,4 @@ function kmeans(dataset, k, useNaiveSharding = true) {
   }
 }
 
-export default kmeans;
+export {kmeans};
