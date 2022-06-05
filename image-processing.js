@@ -83,5 +83,15 @@ function RGBToHSL(data) {
     return HSL;
 };
 
-export { partitionImage, RGBToHSL };
+// Removes the alpha values from the RGB returned by the canvas
+function removeAlpha(RGBdata) {
+    let data = [];
+    for (let i = 0; i < RGBdata.length; i+= 4) {
+        data.push(RGBdata[i]);
+        data.push(RGBdata[i+1]);
+        data.push(RGBdata[i+2]);
+    }
+    return data;
+}
+export { partitionImage, RGBToHSL, removeAlpha};
 

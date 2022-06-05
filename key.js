@@ -18,7 +18,7 @@ function generateKey(centroids) {
     }
     let colorResult = [r / entries, g / entries, b / entries];
     // keys is the array of RGB values, index 0 = C, moving up by half steps
-    const keys = [[233, 51, 35], [130, 24, 242], [255, 255, 84], [171, 77, 136], [204, 241, 252], [157, 31, 56], [129, 138, 245], [239, 134, 50], [178, 120, 244], [103, 201, 77], [159, 106, 123], [155, 200, 250]];
+    const keys = [[255, 0, 0], [145, 0, 255], [255, 255, 0], [183, 70, 139], [195, 243, 255], [173, 0, 52], [125, 139, 253], [255, 126, 0], [188, 116, 253], [52, 204, 51], [169, 102, 125], [144, 201, 255]];
     const colorMap = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
     var minDistance = euclideanDistance(colorResult, keys[0]);
@@ -35,4 +35,4 @@ function generateKey(centroids) {
     return key;
 }
 
-export {generateKey};
+export {generateKey, euclideanDistance};
