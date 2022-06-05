@@ -35,4 +35,4 @@ function generateKey(centroids) {
     return key;
 }
 
-export default generateKey;
+export {generateKey};
