@@ -93,5 +93,6 @@ function removeAlpha(RGBdata) {
     }
     return data;
 }
+
 export { partitionImage, RGBToHSL, removeAlpha};
 

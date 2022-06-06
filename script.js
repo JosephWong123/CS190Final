@@ -1,5 +1,5 @@
 import { playNotes } from "./play-notes.js";
-import { kmeans } from "./kmeans.js";
+import kmeans from "./kmeans.js";
 import { partitionImage, RGBToHSL, removeAlpha } from "./image-processing.js";
 import { generateKey } from "./key.js";
 
@@ -26,14 +26,20 @@ window.loadFile = function(event) {
             const tag = document.getElementById("c" + (i + 1));
             const color = clusterResults.centroids[i];
             if (clusterResults.clusters[i].points.length > 1) {
-                // console.log(color);
                 tag.style.color = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")";
             }
         }
-        let key = generateKey(clusterResults.centroids);
+        let key = generateKey(clusterResults.centroids, clusterResults.clusters);
         let HSLdata = RGBToHSL(data);
         let RGBdata = removeAlpha(data);
-        playNotes(HSLdata, RGBdata, key, "minor");
+        let lightSum = 0;
+        for (let i = 0; i < HSLdata.length / 3; ++i) {
+                lightSum += HSLdata[3*i+2];
+        }
+        const avgLightness  = lightSum / HSLdata.length * 3;
+        const tonality = avgLightness < 0.25 ? "minor" : "major";
+        console.log(tonality);
+        playNotes(HSLdata, RGBdata, key, tonality);
     }
 
     // Loading image into Canvas: https://stackoverflow.com/questions/6011378/how-to-add-image-to-canvas
