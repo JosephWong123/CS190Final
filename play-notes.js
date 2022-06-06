@@ -2,20 +2,27 @@ import { euclideanDistance } from "./key.js";
 
 var audioContext;
 
-function startNote(gain, freq, lightness, delay) {
+function playNote(position, duration, gain, freq, attackTime) {
     const oscillator = audioContext.createOscillator();
+    
     oscillator.frequency.value = freq;
     oscillator.type = "sine";
+
     const oscillatorGain = audioContext.createGain();
     oscillator.connect(oscillatorGain);
     oscillatorGain.connect(audioContext.destination);
-    oscillatorGain.gain.cancelScheduledValues(delay);
-    oscillatorGain.gain.setValueAtTime(0, delay);
-    oscillatorGain.gain.linearRampToValueAtTime(gain, delay + (1 - lightness) * .025);
-    oscillatorGain.gain.linearRampToValueAtTime(0, delay + .48);
-    oscillator.start(delay);
-    oscillator.stop(delay + .5);
-};
+
+    oscillatorGain.gain.setValueAtTime(0, position);
+    oscillatorGain.gain.linearRampToValueAtTime(gain, position + attackTime);
+    oscillatorGain.gain.linearRampToValueAtTime(0, position + duration);
+
+    oscillator.start(position);
+    oscillator.stop(position + duration);
+}
+
+function startNote(gain, freq, lightness, delay) {
+    playNote(delay, 0.5, gain, freq,  (1 - lightness) * 0.025);
+}
 
 function playNotes(HSLdata, RGBdata, key, mode) {
     console.log(key);
@@ -89,3 +96,4 @@ function playNotes(HSLdata, RGBdata, key, mode) {
 };
 
 export { playNotes };
+
