@@ -50,7 +50,7 @@ window.loadFile = function(event) {
             }
             pixelData.push(pixel);
         }
-        let clusterResults = kmeans(pixelData, 5);
+        let clusterResults = kmeans(pixelData, 10);
         clusterResults.clusters.sort((a, b) => b.points.length - a.points.length);
         for (let i = 0; i < clusterResults.clusters.length; ++i) {
             const tag = document.getElementById("c" + (i + 1));
