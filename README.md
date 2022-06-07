@@ -7,7 +7,7 @@ This project will not work without npm and http-server. To run this project, run
 
 ## Image Processing
 
-We partition the uploaded image into a 100x100 grid in order to simplify calculation. We take the average RGB values for each of these partitions, and we then use these values to calculate the HSL values. Hue is generally used for pitch while saturation is used for loudness and lightness is used for articulation. In order to determine the dominant colors, we use k-means clustering.
+We partition the uploaded image into a 10x10 grid in order to simplify calculation. We take the average RGB values for each of these partitions, and we then use these values to calculate the HSL values. Hue is generally used for pitch while saturation is used for loudness and lightness is used for articulation. In order to determine the dominant colors, we use k-means clustering.
 
 ## Music Modes
 
