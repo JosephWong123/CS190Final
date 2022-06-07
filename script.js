@@ -11,6 +11,7 @@ window.loadFile = function(event) {
     var canvas = document.getElementById('output');
     let context = canvas.getContext('2d');
 
+    context.clearRect(0, 0, canvas.width, canvas.height);
     let image = new Image();
     image.src = URL.createObjectURL(event.target.files[0]);
     image.onload = function(){
