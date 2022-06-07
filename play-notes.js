@@ -126,8 +126,9 @@ function playChords(HSLdata, RGBdata, key, mode, rootHue) {
 }
 
 function playRhythms(HSLdata, RGBdata, key, mode, rootHue) {
-    const subdivision = 4;
-    const maxDuration = 4;
+    const subdivision = 12;
+    const maxDuration = 6;
+    const timeFactor = 2;
     const initialRepeatProb = 0.5;
 
     let repeatProb = initialRepeatProb;
@@ -150,7 +151,7 @@ function playRhythms(HSLdata, RGBdata, key, mode, rootHue) {
             repeatProb /= 2;
         }
 
-        const duration = state / subdivision;
+        const duration = state / subdivision * timeFactor;
 
         [freqs[pitch], freqs[(pitch+2)%freqs.length], freqs[(pitch+4)%freqs.length]].forEach((v) => playNote(time, duration, gain / 3, v, (1 - lightness) * 0.025));
         time += duration;

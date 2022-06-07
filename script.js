@@ -50,9 +50,9 @@ window.loadFile = function(event) {
             }
             pixelData.push(pixel);
         }
-        let clusterResults = kmeans(pixelData, 10);
-        // console.log(clusterResults);
-        for (let i = 0; i < 10; ++i) {
+        let clusterResults = kmeans(pixelData, 5);
+        clusterResults.clusters.sort((a, b) => b.points.length - a.points.length);
+        for (let i = 0; i < clusterResults.clusters.length; ++i) {
             const tag = document.getElementById("c" + (i + 1));
             const color = clusterResults.centroids[i];
             if (clusterResults.clusters[i].points.length > 1) {
