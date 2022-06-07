@@ -44,7 +44,7 @@ function playNotes(HSLdata, RGBdata, key, mode) {
     var keys = [[255, 0, 0], [145, 0, 255], [255, 255, 0], [183, 70, 139], [195, 243, 255], [173, 0, 52], [125, 139, 253], [255, 126, 0], [188, 116, 253], [52, 204, 51], [169, 102, 125], [144, 201, 255]];
     // const colorMap = [0'C', 1'Db', 2'D', 3'Eb', 4'E', 5'F', 6'Gb', 7'G', 8'Ab', 9'A', 10'Bb', 11'B'];
 
-    if (typeof audioContext !== 'undefined') {
+    if (audioContext != null) {
         audioContext.close();
     }
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -95,5 +95,5 @@ function playNotes(HSLdata, RGBdata, key, mode) {
     }
 };
 
-export { playNotes };
+export { playNotes, audioContext };
 

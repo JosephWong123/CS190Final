@@ -1,7 +1,9 @@
-import { playNotes } from "./play-notes.js";
+import { playNotes, audioContext } from "./play-notes.js";
 import kmeans from "./kmeans.js";
 import { partitionImage, RGBToHSL, removeAlpha } from "./image-processing.js";
 import { generateKey } from "./key.js";
+
+var musicStart = () => {};
 
 window.loadFile = function(event) {
     var canvas = document.getElementById('output');
@@ -39,8 +41,17 @@ window.loadFile = function(event) {
         const avgLightness  = lightSum / HSLdata.length * 3;
         const tonality = avgLightness < 0.25 ? "minor" : "major";
         console.log(tonality);
-        playNotes(HSLdata, RGBdata, key, tonality);
+        musicStart = () => playNotes(HSLdata, RGBdata, key, tonality);
     }
 
     // Loading image into Canvas: https://stackoverflow.com/questions/6011378/how-to-add-image-to-canvas
+};
+
+window.togglePlay = function(event) {
+    if (audioContext == null) {
+        musicStart();
+    } else {
+        audioContext.close();
+        audioContext = null;
+    }
 };
