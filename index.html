@@ -8,7 +8,17 @@
         <p>Upload Image</p>
         <p><input type="file"  accept="image/*" name="image" id="file"  onchange="loadFile(event)"></p>
         <canvas id="output"></canvas>
-        <button type="button" onclick="togglePlay(event)">Play/Pause</button>
+        <br />
+        
+        <select onchange="selectAlgorithm(this)">
+            <option value="simple">Simple mapping</option>
+            <option value="contour">Contour mapping</option>
+        </select>
+
+        <button onclick="play(event)">Play</button>
+        <button onclick="pause(event)">Pause</button>
+        <button onclick="reset(event)">Reset</button>
+
         <div id="c1">
             <p>Clustered Color 1</p>
         </div>

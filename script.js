@@ -1,8 +1,10 @@
-import { playNotes, audioContext } from "./play-notes.js";
+import { playNotes, playContourNotes, audioContext } from "./play-notes.js";
 import kmeans from "./kmeans.js";
 import { partitionImage, RGBToHSL, removeAlpha } from "./image-processing.js";
 import { generateKey } from "./key.js";
 
+var simpleAlgorithm = () => {};
+var contourAlgorithm = () => {};
 var musicStart = () => {};
 
 window.loadFile = function(event) {
@@ -41,17 +43,42 @@ window.loadFile = function(event) {
         const avgLightness  = lightSum / HSLdata.length * 3;
         const tonality = avgLightness < 0.25 ? "minor" : "major";
         console.log(tonality);
-        musicStart = () => playNotes(HSLdata, RGBdata, key, tonality);
+        simpleAlgorithm = () => playNotes(HSLdata, RGBdata, key, tonality);
+        contourAlgorithm = () => playContourNotes(HSLdata, RGBdata, key, tonality);
+        musicStart = simpleAlgorithm;
     }
 
     // Loading image into Canvas: https://stackoverflow.com/questions/6011378/how-to-add-image-to-canvas
 };
 
-window.togglePlay = function(event) {
-    if (audioContext == null) {
+window.selectAlgorithm = function(selectObject) {
+    switch (selectObject.value) {
+        case "contour":
+            musicStart = contourAlgorithm;
+            break;
+        default:
+            musicStart = simpleAlgorithm;
+    }
+    musicStart();
+    audioContext.suspend();
+};
+
+window.play = function(event) {
+    if (audioContext == null || audioContext.state == "closed") {
         musicStart();
-    } else {
-        audioContext.close();
-        audioContext = null;
+    } else if (audioContext.state == "suspended") {
+        audioContext.resume();
     }
 };
+
+window.pause = function(event) {
+    if (audioContext != null && audioContext.state == "running") {
+        audioContext.suspend();
+    }
+}
+
+window.reset = function(event) {
+    musicStart();
+    audioContext.suspend();
+}
+
