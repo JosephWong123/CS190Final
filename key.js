@@ -31,7 +31,7 @@ function generateKey(centroids, clusters) {
     var b = 0;
     var entries = 0;
 
-    for (var i = centroids.length - 1; i >= 0; i--) {
+    for (var i = 0; i < 3; ++i) {
         var weight = clusters[i].points.length;
         r += (weight * centroids[i][0]);
         g += (weight * centroids[i][1]);
