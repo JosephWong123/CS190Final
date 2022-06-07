@@ -1,3 +1,5 @@
+import { RGBToHSL } from "./image-processing.js";
+
 function euclideanDistance(color1, color2) {
     return Math.sqrt(Math.pow(color1[0] - color2[0], 2) + Math.pow(color1[1] - color2[1], 2) + Math.pow(color1[2] - color2[2], 2));
 }
@@ -43,7 +45,8 @@ function generateKey(centroids, clusters) {
     // keys is the array of RGB values, index 0 = C, moving up by half steps
 
     const key = getScriabin(colorResult);
-    return key;
+    const rootHue = RGBToHSL(colorResult)[0];
+    return [key, rootHue];
 }
 
-export {generateKey, euclideanDistance, getScriabin};
+export {generateKey, euclideanDistance};

@@ -1,9 +1,10 @@
-import { playNotes, playChords, playRhythms, audioContext } from "./play-notes.js";
+import { playNotes, playScriabinNotes, playChords, playRhythms, playHarmony, audioContext } from "./play-notes.js";
 import kmeans from "./kmeans.js";
 import { partitionImage, RGBToHSL, removeAlpha } from "./image-processing.js";
 import { generateKey } from "./key.js";
 
 var simpleAlgorithm = () => {};
+var scriabinAlgorithm = () => {};
 var chordAlgorithm= () => {};
 var rhythmAlgorithm= () => {};
 var harmonyAlgorithm= () => {};
@@ -13,6 +14,9 @@ function musicStart() {
     switch (algorithm) {
         case "chord":
             chordAlgorithm();
+            break;
+        case "scriabin":
+            scriabinAlgorithm();
             break;
         case "rhythm":
             rhythmAlgorithm();
@@ -55,7 +59,7 @@ window.loadFile = function(event) {
                 tag.style.color = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")";
             }
         }
-        let key = generateKey(clusterResults.centroids, clusterResults.clusters);
+        let [key, rootHue] = generateKey(clusterResults.centroids, clusterResults.clusters);
         let HSLdata = RGBToHSL(data);
         let RGBdata = removeAlpha(data);
         let lightSum = 0;
@@ -69,10 +73,11 @@ window.loadFile = function(event) {
         }
         const avgSaturation  = satSum / HSLdata.length * 3;
         const tonality = avgLightness + avgSaturation < 1 && avgLightness < 0.5 && avgSaturation < 0.5 ? "minor" : "major";
-        simpleAlgorithm = () => playNotes(HSLdata, RGBdata, key, tonality);
-        chordAlgorithm = () => playChords(HSLdata, RGBdata);
-        rhythmAlgorithm = () => playRhythms(HSLdata, RGBdata);
-        harmonyAlgorithm = () => playHarmony(HSLdata, RGBdata);
+        simpleAlgorithm = () => playNotes(HSLdata, RGBdata, key, tonality, rootHue);
+        scriabinAlgorithm = () => playScriabinNotes(HSLdata, RGBdata, key, tonality);
+        chordAlgorithm = () => playChords(HSLdata, RGBdata, key, tonality, rootHue);
+        rhythmAlgorithm = () => playRhythms(HSLdata, RGBdata, key, tonality, rootHue);
+        harmonyAlgorithm = () => playHarmony(HSLdata, RGBdata, key, tonality, rootHue);
     }
 
     // Loading image into Canvas: https://stackoverflow.com/questions/6011378/how-to-add-image-to-canvas

@@ -1,26 +1,6 @@
-import { euclideanDistance, getScriabin } from "./key.js";
+import { euclideanDistance } from "./key.js";
 
 var audioContext;
-
-function precalcFreqs(startMidi, endMidi) {
-    if (startMidi > endMidi) {
-        return [];
-    }
-
-    const semitoneFactor = Math.pow(2, 1/12);
-    const a4Freq = 440;
-    const a4Midi = 69;
-
-    let freqs = [a4Freq * Math.pow(2, (startMidi - a4Midi) / 12)];
-    let midi = startMidi + 1;
-
-    while (midi <= endMidi) {
-        freqs.push(freqs[freqs.length-1] * semitoneFactor);
-        ++midi;
-    }
-
-    return freqs;
-}
 
 function playNote(position, duration, gain, freq, attackTime) {
     const oscillator = audioContext.createOscillator();
@@ -33,60 +13,11 @@ function playNote(position, duration, gain, freq, attackTime) {
     oscillatorGain.connect(audioContext.destination);
 
     oscillatorGain.gain.setValueAtTime(0, position);
-    oscillatorGain.gain.linearRampToValueAtTime(gain, position + attackTime);
+    oscillatorGain.gain.linearRampToValueAtTime(gain / 2, position + attackTime);
     oscillatorGain.gain.linearRampToValueAtTime(0, position + duration);
 
     oscillator.start(position);
     oscillator.stop(position + duration);
-}
-
-function startNote(gain, freq, lightness, delay) {
-    const attackTime = (1 - lightness) * 0.025;
-    playNote(delay, 0.5, gain, freq,  attackTime);
-}
-
-function getChordFreqs(root, major) {
-    const freqs = precalcFreqs(60, 71);
-    let rootFreq;
-    switch (root) {
-        case "C":
-            rootFreq = freqs[0];
-            break;
-        case "Db":
-            rootFreq = freqs[1];
-            break;
-        case "D":
-            rootFreq = freqs[2];
-            break;
-        case "Eb":
-            rootFreq = freqs[3];
-            break;
-        case "E":
-            rootFreq = freqs[4];
-            break;
-        case "F":
-            rootFreq = freqs[5];
-            break;
-        case "Gb":
-            rootFreq = freqs[6];
-            break;
-        case "G":
-            rootFreq = freqs[7];
-            break;
-        case "Ab":
-            rootFreq = freqs[8];
-            break;
-        case "A":
-            rootFreq = freqs[9];
-            break;
-        case "Bb":
-            rootFreq = freqs[10];
-            break;
-        default: //B
-            rootFreq = freqs[11];
-    }
-
-    return major ? [rootFreq, rootFreq * Math.pow(2, 1/3), rootFreq * Math.pow(2, 7/12)] : [rootFreq, rootFreq * Math.pow(2, 1/4), rootFreq * Math.pow(2, 7/12)];
 }
 
 function setUpAudioContext() {
@@ -144,7 +75,20 @@ function getKeysFreqs(key, mode) {
     return [keys, freqs];
 }
 
-function playNotes(HSLdata, RGBdata, key, mode) {
+function playNotes(HSLdata, RGBdata, key, mode, rootHue) {
+    setUpAudioContext();
+    const [keys, freqs] = getKeysFreqs(key, mode);
+
+    for (let i = 0; i < HSLdata.length; i += 3) { // HSLdata and RGBdata are the same length
+        let data = [RGBdata[i], RGBdata[i+1], RGBdata[i+2]];
+        const pitch = Math.round((HSLdata[i] - rootHue + 360) / 360 * 7) % 7;
+        const gain = HSLdata[i+1];
+        const lightness = HSLdata[i+2];
+        playNote(i / 3 / 2, 0.5, gain, freqs[pitch], (1 - lightness) * 0.025);
+    }
+}
+
+function playScriabinNotes(HSLdata, RGBdata, key, mode) {
     setUpAudioContext();
     const [keys, freqs] = getKeysFreqs(key, mode);
 
@@ -163,24 +107,25 @@ function playNotes(HSLdata, RGBdata, key, mode) {
         const gain = HSLdata[i+1];
         const lightness = HSLdata[i+2];
         // console.log(pitch, gain, lightness);
-        startNote(gain, freqs[pitch], lightness, i / 3 / 2);
+        playNote(i / 3 / 2, 0.5, gain, freqs[pitch], (1 - lightness) * 0.025);
     }
 }
 
-function playChords(HSLdata, RGBdata) {
+function playChords(HSLdata, RGBdata, key, mode, rootHue) {
     setUpAudioContext();
+    const [keys, freqs] = getKeysFreqs(key, mode);
 
     for (let i = 0; i < HSLdata.length; i += 3) { // HSLdata and RGBdata are the same length
         const data = [RGBdata[i], RGBdata[i+1], RGBdata[i+2]];
-        const chord = getScriabin(data);
+        const pitch = Math.round((HSLdata[i] - rootHue + 360) / 360 * 7) % 7;
         const gain = HSLdata[i+1];
         const lightness = HSLdata[i+2];
 
-        getChordFreqs(chord, lightness >= 0.4).forEach((v) => startNote(gain / 3, v, lightness, i / 3 / 2));
+        [freqs[pitch], freqs[(pitch+2)%freqs.length], freqs[(pitch+4)%freqs.length]].forEach((v) => playNote(i / 3 / 2, 0.5, gain, v, (1 - lightness) * 0.025));
     }
 }
 
-function playRhythms(HSLdata, RGBdata) {
+function playRhythms(HSLdata, RGBdata, key, mode, rootHue) {
     const subdivision = 4;
     const maxDuration = 4;
     const initialRepeatProb = 0.5;
@@ -190,10 +135,11 @@ function playRhythms(HSLdata, RGBdata) {
     let time = 0;
 
     setUpAudioContext();
+    const [keys, freqs] = getKeysFreqs(key, mode);
 
     for (let i = 0; i < HSLdata.length; i += 3) { // HSLdata and RGBdata are the same length
         const data = [RGBdata[i], RGBdata[i+1], RGBdata[i+2]];
-        const chord = getScriabin(data);
+        const pitch = Math.round((HSLdata[i] - rootHue + 360) / 360 * 7) % 7;
         const gain = HSLdata[i+1];
         const lightness = HSLdata[i+2];
         
@@ -206,12 +152,12 @@ function playRhythms(HSLdata, RGBdata) {
 
         const duration = state / subdivision;
 
-        getChordFreqs(chord, lightness >= 0.4).forEach((v) => playNote(time, duration, gain / 3, v, (1 - lightness) * 0.025));
+        [freqs[pitch], freqs[(pitch+2)%freqs.length], freqs[(pitch+4)%freqs.length]].forEach((v) => playNote(time, duration, gain / 3, v, (1 - lightness) * 0.025));
         time += duration;
     }
 }
 
-function playHarmony(HSLdata, RGBdata) {
+function playHarmony(HSLdata, RGBdata, key, mode, rootHue) {
     const subdivision = 4;
     const maxDuration = 4;
     const initialRepeatProb = 0.5;
@@ -221,10 +167,11 @@ function playHarmony(HSLdata, RGBdata) {
     let time = 0;
 
     setUpAudioContext();
+    const [keys, freqs] = getKeysFreqs(key, mode);
 
     for (let i = 0; i < HSLdata.length; i += 3) { // HSLdata and RGBdata are the same length
         const data = [RGBdata[i], RGBdata[i+1], RGBdata[i+2]];
-        const chord = getScriabin(data);
+        const pitch = Math.round((HSLdata[i] - rootHue + 360) / 360 * 7) % 7;
         const gain = HSLdata[i+1];
         const lightness = HSLdata[i+2];
         
@@ -237,10 +184,10 @@ function playHarmony(HSLdata, RGBdata) {
 
         const duration = state / subdivision;
 
-        getChordFreqs(chord, lightness >= 0.4).forEach((v) => playNote(time, duration, gain / 3, v, (1 - lightness) * 0.025));
+        [freqs[pitch], freqs[(pitch+2)%freqs.length], freqs[(pitch+4)%freqs.length]].forEach((v) => playNote(time, duration, gain / 3, v, (1 - lightness) * 0.025));
         time += duration;
     }
 }
 
-export { playNotes, playChords, playRhythms, playHarmony, audioContext };
+export { playNotes, playScriabinNotes, playChords, playRhythms, playHarmony, audioContext };
 
