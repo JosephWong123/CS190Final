@@ -1,13 +1,34 @@
-import { playNotes, playContourNotes, audioContext } from "./play-notes.js";
+import { playNotes, playChords, playRhythms, audioContext } from "./play-notes.js";
 import kmeans from "./kmeans.js";
 import { partitionImage, RGBToHSL, removeAlpha } from "./image-processing.js";
 import { generateKey } from "./key.js";
 
 var simpleAlgorithm = () => {};
-var contourAlgorithm = () => {};
-var musicStart = () => {};
+var chordAlgorithm= () => {};
+var rhythmAlgorithm= () => {};
+var harmonyAlgorithm= () => {};
+var algorithm = "";
+
+function musicStart() {
+    switch (algorithm) {
+        case "chord":
+            chordAlgorithm();
+            break;
+        case "rhythm":
+            rhythmAlgorithm();
+            break;
+        case "harmony":
+            harmonyAlgorithm();
+            break;
+        default:
+            simpleAlgorithm();
+    }
+}
 
 window.loadFile = function(event) {
+    if (audioContext != null) {
+        audioContext.close();
+    }
     var canvas = document.getElementById('output');
     let context = canvas.getContext('2d');
 
@@ -18,16 +39,16 @@ window.loadFile = function(event) {
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
         let data = partitionImage(context, canvas, 10, 10);
         let pixelData = [];
-        for (let i = 0; i < data.length; i += 3) {
+        for (let i = 0; i < data.length; i += 4) {
             let pixel = [];
             for (let j = 0; j < 3; ++j) {
                 pixel.push(isFinite(data[i+j]) ? data[i+j] : 0);
             }
             pixelData.push(pixel);
         }
-        let clusterResults = kmeans(pixelData, 5);
-        console.log(clusterResults);
-        for (let i = 0; i < 5; ++i) {
+        let clusterResults = kmeans(pixelData, 10);
+        // console.log(clusterResults);
+        for (let i = 0; i < 10; ++i) {
             const tag = document.getElementById("c" + (i + 1));
             const color = clusterResults.centroids[i];
             if (clusterResults.clusters[i].points.length > 1) {
@@ -42,26 +63,26 @@ window.loadFile = function(event) {
                 lightSum += HSLdata[3*i+2];
         }
         const avgLightness  = lightSum / HSLdata.length * 3;
-        const tonality = avgLightness < 0.25 ? "minor" : "major";
-        console.log(tonality);
+        let satSum = 0;
+        for (let i = 0; i < HSLdata.length / 3; ++i) {
+                satSum += HSLdata[3*i+1];
+        }
+        const avgSaturation  = satSum / HSLdata.length * 3;
+        const tonality = avgLightness + avgSaturation < 1 && avgLightness < 0.5 && avgSaturation < 0.5 ? "minor" : "major";
         simpleAlgorithm = () => playNotes(HSLdata, RGBdata, key, tonality);
-        contourAlgorithm = () => playContourNotes(HSLdata, RGBdata, key, tonality);
-        musicStart = simpleAlgorithm;
+        chordAlgorithm = () => playChords(HSLdata, RGBdata);
+        rhythmAlgorithm = () => playRhythms(HSLdata, RGBdata);
+        harmonyAlgorithm = () => playHarmony(HSLdata, RGBdata);
     }
 
     // Loading image into Canvas: https://stackoverflow.com/questions/6011378/how-to-add-image-to-canvas
 };
 
 window.selectAlgorithm = function(selectObject) {
-    switch (selectObject.value) {
-        case "contour":
-            musicStart = contourAlgorithm;
-            break;
-        default:
-            musicStart = simpleAlgorithm;
+    if (audioContext != null && audioContext.state != "closed") {
+        audioContext.close();
     }
-    musicStart();
-    audioContext.suspend();
+    algorithm = selectObject.value;
 };
 
 window.play = function(event) {

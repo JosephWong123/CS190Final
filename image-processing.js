@@ -1,8 +1,8 @@
 function partitionImage (context, canvas, rows, columns) {
     var width = canvas.width;
     var height = canvas.height;
-    var boxWidth = Math.floor(width / columns);
-    var boxHeight = Math.floor(height / rows);
+    var boxWidth = Math.max(Math.floor(width / columns), 1);
+    var boxHeight = Math.max(Math.floor(height / rows), 1);
 
     var partitionedData = [];
 
@@ -30,8 +30,8 @@ function partitionImage (context, canvas, rows, columns) {
             let aAvg = aTotal / numPixels;
 
             partitionedData.push(Math.round(rAvg));
-            partitionedData.push(Math.round(bAvg));
             partitionedData.push(Math.round(gAvg));
+            partitionedData.push(Math.round(bAvg));
             partitionedData.push(Math.round(aAvg));
         }
     }

@@ -9,7 +9,7 @@ function getDistanceSQ(a, b) {
   return diffs.reduce((r, e) => (r + (e * e)), 0);
 }
 
-const MAX_ITERATIONS = 50;
+const MAX_ITERATIONS = 100;
 
 function randomBetween(min, max) {
   return Math.floor(
